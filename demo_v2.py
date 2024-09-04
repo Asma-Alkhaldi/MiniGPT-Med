@@ -519,10 +519,9 @@ def gradio_taskselect(idx):
 
 chat = Chat(model, vis_processor, device=device)
 
-title = """<h1 align="center">miniGPT-Med Demo</h1>"""
-description = 'Welcome to Our miniGPT-Med Chatbot Demo!'
-# article = """<p><a href='https://minigpt-v2.github.io'><img src='https://img.shields.io/badge/Project-Page-Green'></a></p><p><a href='https://github.com/Vision-CAIR/MiniGPT-4/blob/main/MiniGPTv2.pdf'><img src='https://img.shields.io/badge/Paper-PDF-red'></a></p><p><a href='https://github.com/Vision-CAIR/MiniGPT-4'><img src='https://img.shields.io/badge/GitHub-Repo-blue'></a></p><p><a href='https://www.youtube.com/watch?v=atFCwV2hSY4'><img src='https://img.shields.io/badge/YouTube-Video-red'></a></p>"""
-article = """<p><a href='https://minigpt-v2.github.io'><img src='https://img.shields.io/badge/Project-Page-Green'></a></p>"""
+title = """<h1 align="center">MiniGPT-Med</h1>"""
+# description = 'Welcome to Our MiniGPT-Med Chatbot Demo!'
+# article = """<p><a href='https://minigpt-med.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a></p>"""
 
 introduction = '''
 For Abilities Involving Visual Grounding:
@@ -541,11 +540,11 @@ text_input = gr.Textbox(placeholder='Upload your image and chat', interactive=Tr
 with gr.Blocks() as demo:
     gr.Markdown(title)
     # gr.Markdown(description)
-    gr.Markdown(article)
+    # gr.Markdown(article)
 
     with gr.Row():
         with gr.Column():
-            image = gr.Image(type="pil", tool='sketch', brush_radius=20)
+            image = gr.Sketchpad(brush=Brush(colors=["#000000"], color_mode="fixed", default_size=20))
 
             temperature = gr.Slider(
                 minimum=0.1,
@@ -563,7 +562,7 @@ with gr.Blocks() as demo:
         with gr.Column():
             chat_state = gr.State(value=None)
             img_list = gr.State(value=[])
-            chatbot = gr.Chatbot(label='MiniGPT-v2')
+            chatbot = gr.Chatbot(label='MiniGPT-Med')
 
             dataset = gr.Dataset(
                 components=[gr.Textbox(visible=False)],
