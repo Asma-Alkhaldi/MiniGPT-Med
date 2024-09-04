@@ -579,27 +579,27 @@ with gr.Blocks() as demo:
     replace_flag = gr.State(value=0)
     image.upload(image_upload_trigger, [upload_flag, replace_flag, img_list], [upload_flag, replace_flag])
 # [29, 44, 42, 56]
-    with gr.Row():
-        with gr.Column():
-            gr.Examples(examples=[
-                ["Med_examples_v2/xmlab149/source.jpg", "[identify] what is this {<56><16><84><58>}", upload_flag,
-                 replace_flag, img_list],
-                ["Med_examples_v2/1.2.276.0.7230010.3.1.4.8323329.1495.1517874291.249176.jpg", "[detection] pneumonia", upload_flag, replace_flag, img_list],
-                ["Med_examples_v2/1.2.840.113654.2.55.48339325922382839066544590341580673064.png", "[refer] the nodule in the left lung", upload_flag, replace_flag,
-                 img_list],
-               ["Med_examples_v2/xmlab589/source.jpg", "[grounding] describe this image in detail", upload_flag, replace_flag, img_list],
-            ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
-                outputs=[upload_flag, replace_flag])
-        with gr.Column():
-            gr.Examples(examples=[
-                ["Med_examples_v2/synpic56061.jpg", "[vqa] Which region of the brain is impacted?",
-                 upload_flag, replace_flag, img_list],
-                ["Med_examples_v2/5f4e8079-8225a5d2-1b0c3c46-4394a094-f285db0e.jpg", "Please provide a detailed description of the picture", upload_flag, replace_flag, img_list],
-                ["Med_examples_v2/synpic60423.jpg", "Can you diagnose a pericardial effusion from this image?", upload_flag, replace_flag, img_list],
-                ["Med_examples_v2/synpic58547.jpg", "Could you describe the contents of this image for me?", upload_flag,
-                 replace_flag, img_list],
-            ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
-                outputs=[upload_flag, replace_flag])
+#     with gr.Row():
+#         with gr.Column():
+#             gr.Examples(examples=[
+#                 ["Med_examples_v2/xmlab149/source.jpg", "[identify] what is this {<56><16><84><58>}", upload_flag,
+#                  replace_flag, img_list],
+#                 ["Med_examples_v2/1.2.276.0.7230010.3.1.4.8323329.1495.1517874291.249176.jpg", "[detection] pneumonia", upload_flag, replace_flag, img_list],
+#                 ["Med_examples_v2/1.2.840.113654.2.55.48339325922382839066544590341580673064.png", "[refer] the nodule in the left lung", upload_flag, replace_flag,
+#                  img_list],
+#                ["Med_examples_v2/xmlab589/source.jpg", "[grounding] describe this image in detail", upload_flag, replace_flag, img_list],
+#             ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
+#                 outputs=[upload_flag, replace_flag])
+#         with gr.Column():
+#             gr.Examples(examples=[
+#                 ["Med_examples_v2/synpic56061.jpg", "[vqa] Which region of the brain is impacted?",
+#                  upload_flag, replace_flag, img_list],
+#                 ["Med_examples_v2/5f4e8079-8225a5d2-1b0c3c46-4394a094-f285db0e.jpg", "Please provide a detailed description of the picture", upload_flag, replace_flag, img_list],
+#                 ["Med_examples_v2/synpic60423.jpg", "Can you diagnose a pericardial effusion from this image?", upload_flag, replace_flag, img_list],
+#                 ["Med_examples_v2/synpic58547.jpg", "Could you describe the contents of this image for me?", upload_flag,
+#                  replace_flag, img_list],
+#             ], inputs=[image, text_input, upload_flag, replace_flag, img_list], fn=example_trigger,
+#                 outputs=[upload_flag, replace_flag])
 
     dataset.click(
         gradio_taskselect,
