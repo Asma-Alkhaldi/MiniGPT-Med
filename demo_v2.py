@@ -544,7 +544,7 @@ with gr.Blocks() as demo:
     gr.Markdown(article)
 
     with gr.Row():
-        with gr.Column(scale=1):
+        with gr.Column():
             image = gr.Image(type="pil", tool='sketch', brush_radius=20)
 
             temperature = gr.Slider(
