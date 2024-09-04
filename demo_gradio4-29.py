@@ -612,8 +612,6 @@ with gr.Blocks() as demo:
                 outputs=[upload_flag, replace_flag])
         with gr.Column():
             gr.Examples(examples=[
-                ["Med_examples_v2/synpic50958.jpg", "[vqa] What does the small white lesions in the aorta mean?",
-                 upload_flag, replace_flag, img_list],
                 ["Med_examples_v2/5f4e8079-8225a5d2-1b0c3c46-4394a094-f285db0e.jpg", "Please provide a detailed description of the picture", upload_flag, replace_flag, img_list],
                 ["Med_examples_v2/1.2.276.0.7230010.3.1.4.8323329.16254.1517874395.786150.jpg", "Diagnose this image", upload_flag, replace_flag, img_list],
                 ["Med_examples_v2/synpic58547.jpg", "Could you describe the contents of this image for me?", upload_flag,
