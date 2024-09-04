@@ -544,7 +544,7 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         with gr.Column():
-            image = gr.Sketchpad(brush=Brush(colors=["#000000"], color_mode="fixed", default_size=20))
+            image = gr.Sketchpad(brush=gr.Brush(colors=["#000000"], color_mode="fixed", default_size=20))
 
             temperature = gr.Slider(
                 minimum=0.1,
