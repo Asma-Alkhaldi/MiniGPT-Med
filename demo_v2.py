@@ -27,6 +27,7 @@ from minigpt4.processors import *
 from minigpt4.runners import *
 from minigpt4.tasks import *
 
+chat_enabled = True
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Demo")
@@ -48,25 +49,22 @@ random.seed(42)
 np.random.seed(42)
 torch.manual_seed(42)
 
-cudnn.benchmark = False
-cudnn.deterministic = True
+if chat_enabled:
+    cudnn.benchmark = False
+    cudnn.deterministic = True
+    print('Initializing Chat')
+    args = parse_args()
+    cfg = Config(args)
+    device = 'cuda:{}'.format(args.gpu_id)
+    model_config = cfg.model_cfg
+    model_config.device_8bit = args.gpu_id
+    model_cls = registry.get_model_class(model_config.arch)
+    model = model_cls.from_config(model_config).to(device)
+    vis_processor_cfg = cfg.datasets_cfg.cc_sbu_align.vis_processor.train
+    vis_processor = registry.get_processor_class(vis_processor_cfg.name).from_config(vis_processor_cfg)
+    model = model.eval()
 
-print('Initializing Chat')
-args = parse_args()
-cfg = Config(args)
-
-device = 'cuda:{}'.format(args.gpu_id)
-
-model_config = cfg.model_cfg
-model_config.device_8bit = args.gpu_id
-model_cls = registry.get_model_class(model_config.arch)
-model = model_cls.from_config(model_config).to(device)
 bounding_box_size = 100
-
-vis_processor_cfg = cfg.datasets_cfg.cc_sbu_align.vis_processor.train
-vis_processor = registry.get_processor_class(vis_processor_cfg.name).from_config(vis_processor_cfg)
-
-model = model.eval()
 
 CONV_VISION = Conversation(
     system="",
@@ -195,6 +193,9 @@ def visualize_all_bbox_together(image, generation):
     image_width, image_height = image.size
     image = image.resize([500, int(500 / image_width * image_height)])
     image_width, image_height = image.size
+
+    if image.mode == 'RGBA':
+        image = image.convert('RGB')
 
     string_list = extract_substrings(generation)
     if string_list:  # it is grounding or detection
@@ -385,7 +386,7 @@ def gradio_reset(chat_state, img_list):
         chat_state.messages = []
     if img_list is not None:
         img_list = []
-    return None, gr.update(value=None, interactive=True), gr.update(placeholder='Upload your image and chat',
+    return None, None, gr.update(placeholder='Upload your image and chat',
                                                                     interactive=True), chat_state, img_list
 
 
@@ -415,7 +416,7 @@ def gradio_ask(user_message, chatbot, chat_state, gr_img, img_list, upload_flag,
         text_box_show = ''
 
     if isinstance(gr_img, dict):
-        gr_img, mask = gr_img['image'], gr_img['mask']
+        gr_img, mask = gr_img['background'], gr_img['layers'][0]
     else:
         mask = None
 
@@ -435,10 +436,13 @@ def gradio_ask(user_message, chatbot, chat_state, gr_img, img_list, upload_flag,
             replace_flag = 0
             chatbot = []
         img_list = []
-        llm_message = chat.upload_img(gr_img, chat_state, img_list)
+
+        llm_message = chat.upload_img(gr_img, chat_state, img_list) if chat_enabled else "chat disabled: fake msg"
+
         upload_flag = 0
 
-    chat.ask(user_message, chat_state)
+    if chat_enabled:
+        chat.ask(user_message, chat_state)
 
     chatbot = chatbot + [[user_message, None]]
 
@@ -456,7 +460,7 @@ def gradio_answer(chatbot, chat_state, img_list, temperature):
                               img_list=img_list,
                               temperature=temperature,
                               max_new_tokens=500,
-                              max_length=2000)[0]
+                              max_length=2000)[0] if chat_enabled else "chat disabled: fake msg"
     chatbot[-1][1] = llm_message
     return chatbot, chat_state
 
@@ -464,12 +468,18 @@ def gradio_answer(chatbot, chat_state, img_list, temperature):
 def gradio_stream_answer(chatbot, chat_state, img_list, temperature):
     if len(img_list) > 0:
         if not isinstance(img_list[0], torch.Tensor):
-            chat.encode_img(img_list)
+            if chat_enabled:
+                chat.encode_img(img_list)
+    if not chat_enabled:
+        chat_state.append_message(chat_state.roles[0], "fake text as stream")
     streamer = chat.stream_answer(conv=chat_state,
                                   img_list=img_list,
                                   temperature=temperature,
                                   max_new_tokens=500,
-                                  max_length=2000)
+                                  max_length=2000) if chat_enabled else "fake text as stream".split()
+
+
+
     output = ''
     for new_output in streamer:
         escapped = escape_markdown(new_output)
@@ -482,7 +492,7 @@ def gradio_stream_answer(chatbot, chat_state, img_list, temperature):
 
 def gradio_visualize(chatbot, gr_img):
     if isinstance(gr_img, dict):
-        gr_img, mask = gr_img['image'], gr_img['mask']
+        gr_img, mask = gr_img['background'], gr_img['layers'][0]
 
     unescaped = reverse_escape(chatbot[-1][1])
     visual_img, generation_color = visualize_all_bbox_together(gr_img, unescaped)
@@ -515,9 +525,8 @@ def gradio_taskselect(idx):
     return prompt_list[idx], instruct_list[idx]
 
 
-
-
-chat = Chat(model, vis_processor, device=device)
+if chat_enabled:
+    chat = Chat(model, vis_processor, device=device)
 
 title = """<h1 align="center">MiniGPT-Med</h1>"""
 # description = 'Welcome to Our MiniGPT-Med Chatbot Demo!'
@@ -544,7 +553,7 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         with gr.Column():
-            image = gr.ImageEditor(brush=gr.Brush(colors=["#000000AA"], color_mode="fixed", default_size=10))
+            image = gr.ImageEditor(type="pil",brush=gr.Brush(colors=["#000000AA"], color_mode="fixed", default_size=10))
 
             temperature = gr.Slider(
                 minimum=0.1,
