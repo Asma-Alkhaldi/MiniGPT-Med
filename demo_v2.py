@@ -416,7 +416,8 @@ def gradio_ask(user_message, chatbot, chat_state, gr_img, img_list, upload_flag,
         text_box_show = ''
 
     if isinstance(gr_img, dict):
-        gr_img, mask = gr_img['background'], gr_img['layers'][0]
+        mask = gr_img['layers'][0] if len(gr_img['layers']) else None
+        gr_img = gr_img['background']
     else:
         mask = None
 
@@ -492,7 +493,8 @@ def gradio_stream_answer(chatbot, chat_state, img_list, temperature):
 
 def gradio_visualize(chatbot, gr_img):
     if isinstance(gr_img, dict):
-        gr_img, mask = gr_img['background'], gr_img['layers'][0]
+        mask = gr_img['layers'][0] if len(gr_img['layers']) else None
+        gr_img = gr_img['background']
 
     unescaped = reverse_escape(chatbot[-1][1])
     visual_img, generation_color = visualize_all_bbox_together(gr_img, unescaped)
@@ -651,4 +653,4 @@ with gr.Blocks() as demo:
 
     clear.click(gradio_reset, [chat_state, img_list], [chatbot, image, text_input, chat_state, img_list], queue=False)
 
-demo.launch(debug=True)
+demo.launch()
